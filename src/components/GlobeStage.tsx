@@ -121,7 +121,7 @@ export function GlobeStage() {
     const onMove = (e: PointerEvent) => {
       const x = (e.clientX / window.innerWidth - 0.5) * 0.6;
       const y = (e.clientY / window.innerHeight - 0.5) * -0.6;
-      setTilt({ x, y });
+      tiltRef.current = { x, y };
     };
     window.addEventListener("pointermove", onMove);
     return () => window.removeEventListener("pointermove", onMove);
