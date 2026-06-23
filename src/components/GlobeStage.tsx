@@ -1,21 +1,32 @@
 import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
-import createGlobe from "cobe";
+import * as THREE from "three";
 
 /**
- * Cinematic globe that persists across every page.
+ * Realistic photoreal globe that persists across every page.
  *
- * - Globe canvas is rendered once at the top of the layout (fixed).
- * - Scroll progress + route both drive its size, position and tilt.
- * - On the home hero it dominates the right side; on inner pages it
- *   shrinks to a quiet companion in the corner.
+ * - Three.js sphere with NASA Blue Marble diffuse + topology bump + water
+ *   roughness + clouds layer + atmospheric fresnel glow.
+ * - Mounted once at the SiteLayout level (fixed) so the same globe rides
+ *   along when the user navigates between routes.
+ * - Scroll progress and pathname drive its size, position, blur and tilt.
  */
+
+const EARTH_DAY =
+  "https://unpkg.com/three-globe@2.31.1/example/img/earth-blue-marble.jpg";
+const EARTH_TOPOLOGY =
+  "https://unpkg.com/three-globe@2.31.1/example/img/earth-topology.png";
+const EARTH_WATER =
+  "https://unpkg.com/three-globe@2.31.1/example/img/earth-water.png";
+const EARTH_CLOUDS =
+  "https://unpkg.com/three-globe@2.31.1/example/img/clouds.png";
+
 export function GlobeStage() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const phiRef = useRef(0);
-  const targetSpeedRef = useRef(0.003);
+  const mountRef = useRef<HTMLDivElement>(null);
+  const earthRef = useRef<THREE.Mesh | null>(null);
+  const cloudsRef = useRef<THREE.Mesh | null>(null);
+  const tiltRef = useRef({ x: 0, y: 0 });
   const reduce = useReducedMotion();
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -23,86 +34,194 @@ export function GlobeStage() {
 
   // Scroll-driven motion
   const { scrollYProgress } = useScroll();
-  const smoothY = useSpring(scrollYProgress, { stiffness: 80, damping: 30, mass: 0.6 });
+  const smoothY = useSpring(scrollYProgress, {
+    stiffness: 70,
+    damping: 28,
+    mass: 0.6,
+  });
 
-  // Home only: globe sits anchored on the right of the hero and fades out as
-  // the user scrolls past it. On other routes it does not render at all.
-  const sizeVw = useTransform(smoothY, [0, 0.4], [85, 85]);
-  const xVw = useTransform(smoothY, [0, 0.4], [78, 78]);
-  const yVh = useTransform(smoothY, [0, 0.4], [55, 55]);
-  const opacity = useTransform(smoothY, [0, 0.35, 0.55], [1, 0.8, 0]);
-  const filter = useTransform(smoothY, [0, 0.5], ["blur(0px)", "blur(4px)"]);
-
-  // Pointer-driven tilt — held in a ref so the rAF loop doesn't re-create.
-  const tiltRef = useRef({ x: 0, y: 0.25 });
+  // Trajectory across the page. Home hero parks the globe on the right at
+  // full scale; as the user scrolls it drifts left and shrinks to a
+  // companion mark. Inner pages park the globe smaller in the corner and
+  // drift it gently on scroll.
+  const sizeVw = useTransform(
+    smoothY,
+    [0, 0.2, 0.6, 1],
+    isHome ? [85, 70, 38, 30] : [42, 38, 32, 28],
+  );
+  const xVw = useTransform(
+    smoothY,
+    [0, 0.2, 0.6, 1],
+    isHome ? [78, 70, 22, 78] : [82, 75, 22, 82],
+  );
+  const yVh = useTransform(
+    smoothY,
+    [0, 0.2, 0.6, 1],
+    isHome ? [55, 50, 55, 65] : [22, 35, 60, 70],
+  );
+  const opacity = useTransform(smoothY, [0, 0.95], [1, 0.7]);
+  const blur = useTransform(smoothY, [0, 1], [0, 1.5]);
+  const filter = useTransform(blur, (b) => `blur(${b}px)`);
 
   useEffect(() => {
-    if (!isHome || !canvasRef.current) return;
-    let phi = phiRef.current;
-    let width = 0;
+    const mount = mountRef.current;
+    if (!mount) return;
 
-    const onResize = () => {
-      if (canvasRef.current) {
-        width = canvasRef.current.offsetWidth;
-      }
-    };
-    window.addEventListener("resize", onResize);
-    onResize();
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+    camera.position.set(0, 0, 4);
 
-    if (!canvasRef.current || width === 0) {
-      // Defer until layout settles
-      requestAnimationFrame(onResize);
-    }
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true,
+      powerPreference: "high-performance",
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setClearColor(0x000000, 0);
+    mount.appendChild(renderer.domElement);
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
+    renderer.domElement.style.display = "block";
 
-    const globe = createGlobe(canvasRef.current!, {
-      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
-      width: width * 2,
-      height: width * 2,
-      phi: 0,
-      theta: 0.28,
-      dark: 1,
-      diffuse: 1.4,
-      mapSamples: 18000,
-      mapBrightness: 7,
-      baseColor: [0.16, 0.32, 0.46],
-      markerColor: [1, 0.78, 0.3],
-      glowColor: [0.42, 0.6, 0.78],
-      markers: [
-        { location: [19.076, 72.8777], size: 0.08 },
-        { location: [40.7128, -74.006], size: 0.08 },
-        { location: [51.5074, -0.1278], size: 0.07 },
-        { location: [35.6762, 139.6503], size: 0.07 },
-        { location: [-33.8688, 151.2093], size: 0.06 },
-        { location: [25.276, 55.2962], size: 0.06 },
-        { location: [1.3521, 103.8198], size: 0.05 },
-        { location: [-23.5505, -46.6333], size: 0.06 },
-        { location: [48.8566, 2.3522], size: 0.06 },
-      ],
+    // ------ Lights ------
+    const ambient = new THREE.AmbientLight(0xffffff, 0.35);
+    scene.add(ambient);
+
+    const sun = new THREE.DirectionalLight(0xfff2d8, 2.4);
+    sun.position.set(5, 2, 4);
+    scene.add(sun);
+
+    // Rim/fill from the brand blue for cinematic mood
+    const rim = new THREE.DirectionalLight(0x6ea8d6, 0.6);
+    rim.position.set(-5, -1, -2);
+    scene.add(rim);
+
+    // ------ Earth ------
+    const loader = new THREE.TextureLoader();
+    loader.setCrossOrigin("anonymous");
+
+    const earthGeo = new THREE.SphereGeometry(1, 96, 96);
+    const earthMat = new THREE.MeshPhongMaterial({
+      color: 0xffffff,
+      specular: new THREE.Color(0x335577),
+      shininess: 18,
+    });
+    const earth = new THREE.Mesh(earthGeo, earthMat);
+    earth.rotation.y = -Math.PI / 2; // start with Africa/Europe facing
+    scene.add(earth);
+    earthRef.current = earth;
+
+    loader.load(EARTH_DAY, (t) => {
+      t.colorSpace = THREE.SRGBColorSpace;
+      t.anisotropy = 8;
+      earthMat.map = t;
+      earthMat.needsUpdate = true;
+    });
+    loader.load(EARTH_TOPOLOGY, (t) => {
+      earthMat.bumpMap = t;
+      earthMat.bumpScale = 0.035;
+      earthMat.needsUpdate = true;
+    });
+    loader.load(EARTH_WATER, (t) => {
+      earthMat.specularMap = t;
+      earthMat.needsUpdate = true;
     });
 
+    // ------ Clouds ------
+    const cloudsGeo = new THREE.SphereGeometry(1.012, 80, 80);
+    const cloudsMat = new THREE.MeshLambertMaterial({
+      transparent: true,
+      depthWrite: false,
+      opacity: 0.45,
+    });
+    const clouds = new THREE.Mesh(cloudsGeo, cloudsMat);
+    scene.add(clouds);
+    cloudsRef.current = clouds;
+
+    loader.load(EARTH_CLOUDS, (t) => {
+      cloudsMat.map = t;
+      cloudsMat.alphaMap = t;
+      cloudsMat.needsUpdate = true;
+    });
+
+    // ------ Atmosphere (fresnel glow) ------
+    const atmoMat = new THREE.ShaderMaterial({
+      uniforms: {
+        glowColor: { value: new THREE.Color(0x6fb6ff) },
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vViewDir;
+        void main() {
+          vec4 mv = modelViewMatrix * vec4(position, 1.0);
+          vNormal = normalize(normalMatrix * normal);
+          vViewDir = normalize(-mv.xyz);
+          gl_Position = projectionMatrix * mv;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vNormal;
+        varying vec3 vViewDir;
+        uniform vec3 glowColor;
+        void main() {
+          float intensity = pow(0.72 - dot(vNormal, vViewDir), 3.2);
+          gl_FragColor = vec4(glowColor, 1.0) * intensity;
+        }
+      `,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+      transparent: true,
+      depthWrite: false,
+    });
+    const atmo = new THREE.Mesh(new THREE.SphereGeometry(1.18, 64, 64), atmoMat);
+    scene.add(atmo);
+
+    // ------ Resize ------
+    const resize = () => {
+      const w = mount.clientWidth;
+      const h = mount.clientHeight;
+      if (!w || !h) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(mount);
+
+    // ------ Animation ------
     let raf = 0;
+    const clock = new THREE.Clock();
     const tick = () => {
-      if (!reduce) phi += targetSpeedRef.current;
-      globe.update({
-        phi: phi + tiltRef.current.x,
-        theta: 0.28 + tiltRef.current.y * 0.15,
-        width: width * 2,
-        height: width * 2,
-      });
+      const dt = clock.getDelta();
+      if (!reduce) {
+        earth.rotation.y += dt * 0.06;
+        clouds.rotation.y += dt * 0.075;
+      }
+      // Pointer parallax tilt (eased)
+      earth.rotation.x += (tiltRef.current.y * 0.4 - earth.rotation.x) * 0.05;
+      clouds.rotation.x = earth.rotation.x;
+      atmo.rotation.copy(earth.rotation);
+
+      renderer.render(scene, camera);
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
 
-    const ro = new ResizeObserver(() => onResize());
-    if (canvasRef.current) ro.observe(canvasRef.current);
-
     return () => {
       cancelAnimationFrame(raf);
-      globe.destroy();
       ro.disconnect();
-      window.removeEventListener("resize", onResize);
+      renderer.dispose();
+      earthGeo.dispose();
+      earthMat.dispose();
+      cloudsGeo.dispose();
+      cloudsMat.dispose();
+      atmoMat.dispose();
+      if (renderer.domElement.parentNode === mount) {
+        mount.removeChild(renderer.domElement);
+      }
     };
-  }, [reduce, isHome]);
+  }, [reduce]);
 
   // Pointer parallax
   useEffect(() => {
@@ -115,11 +234,8 @@ export function GlobeStage() {
     return () => window.removeEventListener("pointermove", onMove);
   }, []);
 
-  if (!isHome) return null;
-
   return (
     <motion.div
-      ref={wrapRef}
       aria-hidden
       className="pointer-events-none fixed inset-0 z-0 hidden md:block"
       style={{ opacity, filter }}
@@ -134,19 +250,18 @@ export function GlobeStage() {
           translateX: "-50%",
           translateY: "-50%",
         }}
-        transition={{ type: "spring", stiffness: 60, damping: 25 }}
       >
-        {/* radial glow halo */}
+        {/* warm halo behind the globe */}
         <div
-          className="absolute inset-[-25%] rounded-full pointer-events-none"
+          className="absolute inset-[-22%] rounded-full pointer-events-none"
           style={{
             background:
-              "radial-gradient(closest-side, oklch(0.84 0.16 85 / 0.18), oklch(0.84 0.16 85 / 0.06) 35%, transparent 65%)",
-            filter: "blur(20px)",
+              "radial-gradient(closest-side, oklch(0.84 0.16 85 / 0.18), oklch(0.84 0.16 85 / 0.05) 38%, transparent 68%)",
+            filter: "blur(24px)",
           }}
         />
-        <canvas
-          ref={canvasRef}
+        <div
+          ref={mountRef}
           className="relative w-full h-full"
           style={{ contain: "layout paint size" }}
         />
