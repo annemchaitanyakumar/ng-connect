@@ -76,38 +76,45 @@ export function GlobeStage() {
       diffuse: 1.4,
       mapSamples: 18000,
       mapBrightness: 7,
-      baseColor: [0.16, 0.32, 0.46], // navy land
-      markerColor: [1, 0.78, 0.3], // brand gold
+      baseColor: [0.16, 0.32, 0.46],
+      markerColor: [1, 0.78, 0.3],
       glowColor: [0.42, 0.6, 0.78],
       markers: [
-        { location: [19.076, 72.8777], size: 0.08 }, // Mumbai
-        { location: [40.7128, -74.006], size: 0.08 }, // NYC
-        { location: [51.5074, -0.1278], size: 0.07 }, // London
-        { location: [35.6762, 139.6503], size: 0.07 }, // Tokyo
-        { location: [-33.8688, 151.2093], size: 0.06 }, // Sydney
-        { location: [25.276, 55.2962], size: 0.06 }, // Dubai
-        { location: [1.3521, 103.8198], size: 0.05 }, // Singapore
-        { location: [-23.5505, -46.6333], size: 0.06 }, // São Paulo
-        { location: [48.8566, 2.3522], size: 0.06 }, // Paris
+        { location: [19.076, 72.8777], size: 0.08 },
+        { location: [40.7128, -74.006], size: 0.08 },
+        { location: [51.5074, -0.1278], size: 0.07 },
+        { location: [35.6762, 139.6503], size: 0.07 },
+        { location: [-33.8688, 151.2093], size: 0.06 },
+        { location: [25.276, 55.2962], size: 0.06 },
+        { location: [1.3521, 103.8198], size: 0.05 },
+        { location: [-23.5505, -46.6333], size: 0.06 },
+        { location: [48.8566, 2.3522], size: 0.06 },
       ],
-      onRender: (state) => {
-        if (!reduce) phi += targetSpeedRef.current;
-        state.phi = phi + tilt.x;
-        state.theta = 0.28 + tilt.y * 0.15;
-        state.width = width * 2;
-        state.height = width * 2;
-      },
     });
+
+    let raf = 0;
+    const tick = () => {
+      if (!reduce) phi += targetSpeedRef.current;
+      globe.update({
+        phi: phi + tiltRef.current.x,
+        theta: 0.28 + tiltRef.current.y * 0.15,
+        width: width * 2,
+        height: width * 2,
+      });
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
 
     const ro = new ResizeObserver(() => onResize());
     if (canvasRef.current) ro.observe(canvasRef.current);
 
     return () => {
+      cancelAnimationFrame(raf);
       globe.destroy();
       ro.disconnect();
       window.removeEventListener("resize", onResize);
     };
-  }, [reduce, tilt.x, tilt.y]);
+  }, [reduce]);
 
   // Pointer parallax
   useEffect(() => {
