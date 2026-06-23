@@ -78,10 +78,9 @@ export function RevealWords({
           <motion.span
             className="inline-block"
             initial={reduce ? false : { y: "110%" }}
-            whileInView={{ y: 0 }}
-            viewport={{ once: true, amount: 0 }}
+            animate={{ y: 0 }}
             transition={{
-              duration: 0.8,
+              duration: 0.9,
               ease: [0.22, 1, 0.36, 1],
               delay: delay + i * 0.06,
             }}
