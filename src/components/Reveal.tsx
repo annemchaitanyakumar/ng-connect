@@ -79,7 +79,7 @@ export function RevealWords({
             className="inline-block"
             initial={reduce ? false : { y: "110%" }}
             whileInView={{ y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
+            viewport={{ once: true, amount: 0 }}
             transition={{
               duration: 0.8,
               ease: [0.22, 1, 0.36, 1],
