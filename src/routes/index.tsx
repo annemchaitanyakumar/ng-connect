@@ -1,29 +1,314 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "motion/react";
+import { ArrowUpRight, ArrowRight, Sparkles, Globe2, Zap } from "lucide-react";
+import { SiteLayout } from "@/components/layout/SiteLayout";
+import { Reveal, RevealWords } from "@/components/Reveal";
+import { Faq } from "@/components/Faq";
+import { Marquee } from "@/components/Marquee";
+import heroWave from "@/assets/hero-wave.jpg";
+import orbImg from "@/assets/orb-glow.jpg";
+import { services } from "@/data/services";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Networq Global — Crafting outstanding digital solutions" },
+      {
+        name: "description",
+        content:
+          "Because every click should lead somewhere. Networq Global is a global digital marketing agency building brand, performance, content and growth systems.",
+      },
+      { property: "og:title", content: "Networq Global" },
+      { property: "og:description", content: "Crafting outstanding digital solutions for your business, across the globe." },
     ],
   }),
-  component: Index,
+  component: Home,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+const workflow = [
+  { tag: "01", title: "Understand", desc: "We start by understanding what exactly your business requires, covering every metric and listing every business need." },
+  { tag: "02", title: "Research", desc: "Powered by advanced tooling and existing intelligence, we analyse the market and the competition your brand will face." },
+  { tag: "03", title: "Ideate", desc: "Once research is thorough, we build a plan that caters to your business needs, our goals and your vision, together." },
+  { tag: "04", title: "Design", desc: "We design content, websites and campaign plans, meeting market standards and your brand expression." },
+  { tag: "05", title: "Results", desc: "We track, optimise and improve every surface, websites, social, content, and deliver only the best for your business." },
+];
+
+const homeFaqs = [
+  { q: "Why should I choose Networq?", a: "Our key motto is not only to build empowering digital solutions for all kinds of businesses, but also to ensure that your vision is kept alive throughout the process. Choose us to see your vision flourish the right way." },
+  { q: "Will there be fixed plans or will it change with brand/business?", a: "No business or brand will have the same plan of action. The entire process is tailored to specific requirements. We conduct thorough research for every business, regardless of its sector, to deliver the best possible results." },
+  { q: "What will be my role in your process?", a: "Your role is to share your vision, goals, and requirements clearly with us. We handle the research, planning, and execution while keeping you updated at key stages for feedback. It is a collaborative process." },
+  { q: "Will your team monitor the campaigns every day?", a: "Yes, we monitor campaigns daily to track performance and optimize every lead generated, helping us maintain consistency and continuously improve results." },
+  { q: "Is Networq open to work with any kind of brand or business?", a: "Yes, we are open to working with all business sectors globally." },
+];
+
+function Home() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
+    <SiteLayout>
+      <Hero />
+      <Marquee
+        items={["Brand", "Performance", "SEO", "Web", "Social", "Content", "Video", "Growth", "AI"]}
+        className="surface-ink py-10 text-cream"
       />
-    </div>
+      <Intro />
+      <ServicesSection />
+      <Workflow />
+      <Stats />
+      <CtaBand />
+      <FaqSection />
+    </SiteLayout>
+  );
+}
+
+function Hero() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  return (
+    <section ref={ref} className="relative surface-ink grain min-h-[100vh] flex items-end overflow-hidden pt-32 pb-20">
+      <motion.img
+        src={heroWave}
+        alt=""
+        aria-hidden
+        style={{ y, scale }}
+        className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-[oklch(0.12_0.04_235/0.5)] via-transparent to-[oklch(0.12_0.04_235)] pointer-events-none" />
+
+      <motion.div style={{ opacity }} className="container-x relative">
+        <Reveal>
+          <div className="chip-dark">
+            <Sparkles className="h-3.5 w-3.5" />
+            Global Digital Agency
+          </div>
+        </Reveal>
+
+        <h1 className="mt-8 font-display font-medium text-[clamp(2.75rem,8vw,8.5rem)] leading-[0.95] tracking-tight text-cream max-w-[16ch]">
+          <RevealWords text="Because every click should lead" />
+          <span className="block">
+            <span className="text-[var(--gold)] italic font-light">somewhere.</span>
+          </span>
+        </h1>
+
+        <div className="mt-12 grid lg:grid-cols-[1.4fr_1fr] gap-10 items-end">
+          <Reveal delay={0.3} className="text-cream/80 text-lg md:text-xl max-w-xl leading-relaxed">
+            Crafting outstanding digital solutions for your business, across the globe.
+            Networq is all about taking you to the next level in the market with brilliance
+            and creativity.
+          </Reveal>
+
+          <Reveal delay={0.5} className="flex flex-wrap gap-3 lg:justify-end">
+            <Link to="/contact" className="btn-primary">
+              Let's get started <ArrowUpRight className="h-4 w-4" />
+            </Link>
+            <Link to="/services/brand-creative" className="btn-ghost">
+              Our services
+            </Link>
+          </Reveal>
+        </div>
+
+        <Reveal delay={0.7} className="mt-20 flex items-center gap-5 text-cream/60 text-xs uppercase tracking-[0.25em]">
+          <span className="inline-block w-10 h-px bg-[var(--gold)]" />
+          Scroll to explore
+        </Reveal>
+      </motion.div>
+    </section>
+  );
+}
+
+function Intro() {
+  return (
+    <section className="py-32 bg-background relative">
+      <div className="container-x">
+        <Reveal>
+          <p className="number-tag text-[var(--ink)]/50">— A note from us</p>
+        </Reveal>
+        <h2 className="mt-6 font-display text-4xl md:text-7xl text-[var(--ink)] leading-[1.02] tracking-tight max-w-[18ch]">
+          <RevealWords text="If it matters to your business, it matters to us." />
+        </h2>
+        <div className="mt-16 grid md:grid-cols-2 gap-12 max-w-5xl">
+          <Reveal delay={0.1} className="text-xl text-[var(--ink)]/75 leading-relaxed">
+            Everything that has something to do with your business, brand or you, matters to us.
+          </Reveal>
+          <Reveal delay={0.2} className="text-xl text-[var(--ink)]/75 leading-relaxed">
+            Blending advanced technology and never-ending creativity, we build the things that make
+            your brand the talk of the town, or the world.
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ServicesSection() {
+  return (
+    <section className="surface-ink grain py-32 relative overflow-hidden">
+      <img
+        src={orbImg}
+        alt=""
+        aria-hidden
+        className="absolute top-0 right-0 w-[70%] opacity-40 mix-blend-screen pointer-events-none"
+        loading="lazy"
+      />
+      <div className="container-x relative">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
+          <div className="max-w-3xl">
+            <div className="chip-dark"><Zap className="h-3.5 w-3.5" /> Our Services</div>
+            <h2 className="mt-6 font-display text-5xl md:text-7xl text-cream tracking-tight leading-[1.02]">
+              Eleven ways we make your brand <span className="text-[var(--gold)] italic">unmissable.</span>
+            </h2>
+          </div>
+          <Link to="/contact" className="btn-primary self-start md:self-end">
+            Build with us <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        <div className="border-t border-white/10">
+          {services.map((s, i) => (
+            <ServiceRow key={s.slug} index={i} slug={s.slug} title={s.title} desc={s.tagline} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ServiceRow({ index, slug, title, desc }: { index: number; slug: string; title: string; desc: string }) {
+  return (
+    <Reveal>
+      <Link
+        to={`/services/${slug}`}
+        className="group block border-b border-white/10 py-7 md:py-10"
+      >
+        <div className="flex items-center gap-6 md:gap-12">
+          <span className="number-tag text-[var(--gold)]/70 w-12">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <div className="flex-1 flex flex-col md:flex-row md:items-baseline gap-2 md:gap-12">
+            <h3 className="font-display text-3xl md:text-5xl text-cream tracking-tight transition-all duration-500 group-hover:text-[var(--gold)] group-hover:translate-x-2">
+              {title}
+            </h3>
+            <p className="text-cream/55 text-sm md:text-base max-w-md">{desc}</p>
+          </div>
+          <span className="grid h-12 w-12 md:h-14 md:w-14 place-items-center rounded-full border border-white/20 text-cream group-hover:bg-[var(--gold)] group-hover:text-[var(--ink)] group-hover:border-[var(--gold)] transition-all duration-500">
+            <ArrowUpRight className="h-5 w-5 group-hover:rotate-45 transition-transform" />
+          </span>
+        </div>
+      </Link>
+    </Reveal>
+  );
+}
+
+function Workflow() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const lineY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+
+  return (
+    <section ref={ref} className="py-32 bg-background">
+      <div className="container-x">
+        <div className="max-w-3xl mb-24">
+          <div className="chip">How we work</div>
+          <h2 className="mt-6 font-display text-5xl md:text-7xl text-[var(--ink)] tracking-tight leading-[1.02]">
+            How Networq <span className="italic text-[var(--ink)]/60">moves forward.</span>
+          </h2>
+        </div>
+
+        <div className="relative">
+          <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-[var(--ink)]/10 -translate-x-px md:-translate-x-1/2" />
+          <motion.div
+            style={{ height: lineY }}
+            className="absolute left-6 md:left-1/2 top-0 w-px bg-[var(--gold)] -translate-x-px md:-translate-x-1/2 origin-top"
+          />
+
+          <div className="space-y-20 md:space-y-32">
+            {workflow.map((w, i) => (
+              <Reveal key={w.tag} direction={i % 2 ? "left" : "right"}>
+                <div className={`grid md:grid-cols-2 gap-8 items-center ${i % 2 ? "md:[direction:rtl]" : ""}`}>
+                  <div className={`pl-16 md:pl-0 md:pr-12 ${i % 2 ? "md:pl-12 md:pr-0" : ""} relative md:text-right`} style={{ direction: "ltr" }}>
+                    <div className={`absolute left-0 top-2 md:left-auto ${i % 2 ? "md:left-[-1.25rem]" : "md:right-[-1.25rem]"}`}>
+                      <span className="grid h-12 w-12 place-items-center rounded-full bg-[var(--gold)] text-[var(--ink)] font-display font-semibold">
+                        {w.tag}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="pl-16 md:pl-12" style={{ direction: "ltr" }}>
+                    <h3 className="font-display text-3xl md:text-5xl text-[var(--ink)] tracking-tight mb-4">{w.title}</h3>
+                    <p className="text-[var(--ink)]/70 text-lg leading-relaxed max-w-md">{w.desc}</p>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Stats() {
+  const stats = [
+    { v: "100%", l: "Tailored strategies" },
+    { v: "24/7", l: "Campaign monitoring" },
+    { v: "11+", l: "Service capabilities" },
+    { v: "Global", l: "All sectors welcome" },
+  ];
+  return (
+    <section className="py-24 bg-[var(--secondary)]">
+      <div className="container-x grid grid-cols-2 md:grid-cols-4 gap-8">
+        {stats.map((s, i) => (
+          <Reveal key={s.l} delay={i * 0.08}>
+            <div className="border-t border-[var(--ink)]/15 pt-6">
+              <div className="font-display text-5xl md:text-6xl text-[var(--ink)] tracking-tight">{s.v}</div>
+              <div className="mt-3 text-sm uppercase tracking-widest text-[var(--ink)]/60">{s.l}</div>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CtaBand() {
+  return (
+    <section className="py-24">
+      <div className="container-x">
+        <div className="relative overflow-hidden rounded-[2rem] surface-ink grain p-12 md:p-20">
+          <img src={orbImg} alt="" aria-hidden loading="lazy" className="absolute -bottom-32 -right-20 w-[80%] opacity-30 mix-blend-screen pointer-events-none" />
+          <div className="relative grid md:grid-cols-[1.5fr_1fr] gap-10 items-end">
+            <div>
+              <div className="chip-dark"><Globe2 className="h-3.5 w-3.5" /> Worldwide</div>
+              <h2 className="mt-6 font-display text-4xl md:text-7xl text-cream tracking-tight leading-[1.02]">
+                Let's make your brand the <span className="italic text-[var(--gold)]">talk of the world.</span>
+              </h2>
+            </div>
+            <div className="flex md:justify-end">
+              <Link to="/contact" className="btn-primary">
+                Let's get started <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FaqSection() {
+  return (
+    <section className="py-28 bg-background">
+      <div className="container-x grid lg:grid-cols-[1fr_1.6fr] gap-16">
+        <div>
+          <div className="chip">FAQ</div>
+          <h2 className="mt-6 font-display text-4xl md:text-6xl text-[var(--ink)] tracking-tight leading-[1.02]">
+            The things people ask before they say yes.
+          </h2>
+        </div>
+        <Faq items={homeFaqs} />
+      </div>
+    </section>
   );
 }
