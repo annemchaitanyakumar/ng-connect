@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ServicesBrandCreativeRouteImport } from './routes/services.brand-creative'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServicesBrandCreativeRoute = ServicesBrandCreativeRouteImport.update({
+  id: '/services/brand-creative',
+  path: '/services/brand-creative',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/services/brand-creative': typeof ServicesBrandCreativeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/services/brand-creative': typeof ServicesBrandCreativeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/services/brand-creative': typeof ServicesBrandCreativeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/services/brand-creative'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/services/brand-creative'
+  id: '__root__' | '/' | '/services/brand-creative'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ServicesBrandCreativeRoute: typeof ServicesBrandCreativeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/services/brand-creative': {
+      id: '/services/brand-creative'
+      path: '/services/brand-creative'
+      fullPath: '/services/brand-creative'
+      preLoaderRoute: typeof ServicesBrandCreativeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ServicesBrandCreativeRoute: ServicesBrandCreativeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
