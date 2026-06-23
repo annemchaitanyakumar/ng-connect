@@ -37,6 +37,7 @@ export function GlobeStage() {
   const tiltRef = useRef({ x: 0, y: 0.25 });
 
   useEffect(() => {
+    if (!isHome || !canvasRef.current) return;
     let phi = phiRef.current;
     let width = 0;
 
