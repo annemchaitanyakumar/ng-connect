@@ -46,8 +46,8 @@ export function GlobeStage() {
   const blur = useTransform(smoothY, [0, 0.5, 1], [0, 0, 2]);
   const filter = useTransform(blur, (b) => `blur(${b}px)`);
 
-  // Pointer-driven tilt (kept subtle)
-  const [tilt, setTilt] = useState({ x: 0, y: 0.25 });
+  // Pointer-driven tilt — held in a ref so the rAF loop doesn't re-create.
+  const tiltRef = useRef({ x: 0, y: 0.25 });
 
   useEffect(() => {
     let phi = phiRef.current;
