@@ -25,31 +25,19 @@ export function GlobeStage() {
   const { scrollYProgress } = useScroll();
   const smoothY = useSpring(scrollYProgress, { stiffness: 80, damping: 30, mass: 0.6 });
 
-  // Home: large globe drifts up and right as you scroll past hero, then
-  // settles small in the corner. Inner pages: subtle parallax.
-  const sizeVw = useTransform(
-    smoothY,
-    [0, 0.15, 0.55, 1],
-    isHome ? [85, 72, 40, 34] : [44, 38, 30, 28],
-  );
-  const xVw = useTransform(
-    smoothY,
-    [0, 0.2, 0.6, 1],
-    isHome ? [78, 74, 55, 62] : [60, 62, 64, 64],
-  );
-  const yVh = useTransform(
-    smoothY,
-    [0, 0.15, 0.55, 1],
-    isHome ? [55, 50, 45, 55] : [10, 22, 40, 50],
-  );
-  const opacity = useTransform(smoothY, [0, 0.85, 1], [1, 0.85, 0.55]);
-  const blur = useTransform(smoothY, [0, 0.5, 1], [0, 0, 2]);
-  const filter = useTransform(blur, (b) => `blur(${b}px)`);
+  // Home only: globe sits anchored on the right of the hero and fades out as
+  // the user scrolls past it. On other routes it does not render at all.
+  const sizeVw = useTransform(smoothY, [0, 0.4], [85, 85]);
+  const xVw = useTransform(smoothY, [0, 0.4], [78, 78]);
+  const yVh = useTransform(smoothY, [0, 0.4], [55, 55]);
+  const opacity = useTransform(smoothY, [0, 0.35, 0.55], [1, 0.8, 0]);
+  const filter = useTransform(smoothY, [0, 0.5], ["blur(0px)", "blur(4px)"]);
 
   // Pointer-driven tilt — held in a ref so the rAF loop doesn't re-create.
   const tiltRef = useRef({ x: 0, y: 0.25 });
 
   useEffect(() => {
+    if (!isHome || !canvasRef.current) return;
     let phi = phiRef.current;
     let width = 0;
 
@@ -114,7 +102,7 @@ export function GlobeStage() {
       ro.disconnect();
       window.removeEventListener("resize", onResize);
     };
-  }, [reduce]);
+  }, [reduce, isHome]);
 
   // Pointer parallax
   useEffect(() => {
@@ -126,6 +114,8 @@ export function GlobeStage() {
     window.addEventListener("pointermove", onMove);
     return () => window.removeEventListener("pointermove", onMove);
   }, []);
+
+  if (!isHome) return null;
 
   return (
     <motion.div
