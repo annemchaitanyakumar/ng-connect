@@ -30,17 +30,17 @@ export function GlobeStage() {
   const sizeVw = useTransform(
     smoothY,
     [0, 0.15, 0.55, 1],
-    isHome ? [78, 70, 38, 32] : [44, 38, 30, 28],
+    isHome ? [85, 72, 40, 34] : [44, 38, 30, 28],
   );
   const xVw = useTransform(
     smoothY,
     [0, 0.2, 0.6, 1],
-    isHome ? [18, 22, 55, 62] : [55, 58, 62, 62],
+    isHome ? [78, 74, 55, 62] : [60, 62, 64, 64],
   );
   const yVh = useTransform(
     smoothY,
     [0, 0.15, 0.55, 1],
-    isHome ? [-10, -2, 38, 55] : [10, 22, 40, 50],
+    isHome ? [55, 50, 45, 55] : [10, 22, 40, 50],
   );
   const opacity = useTransform(smoothY, [0, 0.85, 1], [1, 0.85, 0.55]);
   const blur = useTransform(smoothY, [0, 0.5, 1], [0, 0, 2]);
