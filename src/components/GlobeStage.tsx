@@ -76,7 +76,12 @@ export function GlobeStage() {
       antialias: true,
       powerPreference: "high-performance",
     });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    // Cap pixel ratio harder on mobile for perf; desktop gets 2.
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.25 : 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
     renderer.setClearColor(0x000000, 0);
     mount.appendChild(renderer.domElement);
     renderer.domElement.style.width = "100%";
@@ -84,63 +89,100 @@ export function GlobeStage() {
     renderer.domElement.style.display = "block";
 
     // ------ Lights ------
-    const ambient = new THREE.AmbientLight(0xffffff, 0.35);
-    scene.add(ambient);
+    // Soft hemisphere bounce — sky tinted brand-blue, ground warm.
+    const hemi = new THREE.HemisphereLight(0x5e8fb8, 0x2a1d12, 0.55);
+    scene.add(hemi);
 
-    const sun = new THREE.DirectionalLight(0xfff2d8, 2.4);
-    sun.position.set(5, 2, 4);
+    // Key "sun" light — warm, strong, casts the day/night terminator.
+    const sun = new THREE.DirectionalLight(0xfff1d4, 3.0);
+    sun.position.set(5, 1.5, 3.5);
     scene.add(sun);
 
-    // Rim/fill from the brand blue for cinematic mood
-    const rim = new THREE.DirectionalLight(0x6ea8d6, 0.6);
-    rim.position.set(-5, -1, -2);
+    // Cool brand rim from behind for cinematic separation
+    const rim = new THREE.DirectionalLight(0x6fb6ff, 0.9);
+    rim.position.set(-4, -1, -3);
     scene.add(rim);
 
     // ------ Earth ------
     const loader = new THREE.TextureLoader();
     loader.setCrossOrigin("anonymous");
+    const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
-    const earthGeo = new THREE.SphereGeometry(1, 96, 96);
+    const earthGeo = new THREE.SphereGeometry(1, 128, 128);
     const earthMat = new THREE.MeshPhongMaterial({
       color: 0xffffff,
-      specular: new THREE.Color(0x335577),
-      shininess: 18,
+      specular: new THREE.Color(0x4a7da8),
+      shininess: 26,
     });
     const earth = new THREE.Mesh(earthGeo, earthMat);
-    earth.rotation.y = -Math.PI / 2; // start with Africa/Europe facing
+    earth.rotation.y = -Math.PI / 2; // Africa/Europe facing camera
     scene.add(earth);
     earthRef.current = earth;
 
     loader.load(EARTH_DAY, (t) => {
       t.colorSpace = THREE.SRGBColorSpace;
-      t.anisotropy = 8;
+      t.anisotropy = maxAniso;
       earthMat.map = t;
       earthMat.needsUpdate = true;
     });
     loader.load(EARTH_TOPOLOGY, (t) => {
+      t.anisotropy = maxAniso;
       earthMat.bumpMap = t;
-      earthMat.bumpScale = 0.035;
+      earthMat.bumpScale = 0.06;
       earthMat.needsUpdate = true;
     });
     loader.load(EARTH_WATER, (t) => {
+      t.anisotropy = maxAniso;
       earthMat.specularMap = t;
       earthMat.needsUpdate = true;
     });
 
-    // ------ Clouds ------
-    const cloudsGeo = new THREE.SphereGeometry(1.012, 80, 80);
-    const cloudsMat = new THREE.MeshLambertMaterial({
+    // ------ Clouds — fluffier, with a custom shader so they shade with the sun
+    //  and fade out on the night side instead of looking like a flat decal.
+    const cloudsGeo = new THREE.SphereGeometry(1.015, 96, 96);
+    const cloudsUniforms = {
+      cloudMap: { value: null as THREE.Texture | null },
+      sunDir: { value: new THREE.Vector3(5, 1.5, 3.5).normalize() },
+      opacity: { value: 0.85 },
+    };
+    const cloudsMat = new THREE.ShaderMaterial({
+      uniforms: cloudsUniforms,
       transparent: true,
       depthWrite: false,
-      opacity: 0.45,
+      vertexShader: `
+        varying vec2 vUv;
+        varying vec3 vWorldNormal;
+        void main() {
+          vUv = uv;
+          vWorldNormal = normalize(mat3(modelMatrix) * normal);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec2 vUv;
+        varying vec3 vWorldNormal;
+        uniform sampler2D cloudMap;
+        uniform vec3 sunDir;
+        uniform float opacity;
+        void main() {
+          vec4 c = texture2D(cloudMap, vUv);
+          float a = c.r; // alpha encoded in luminance
+          if (a < 0.02) discard;
+          float ndl = clamp(dot(normalize(vWorldNormal), normalize(sunDir)), 0.0, 1.0);
+          // soft day/night falloff so cloud tops glow warm in sun, fade dark at night
+          float light = mix(0.08, 1.0, smoothstep(0.0, 0.45, ndl));
+          vec3 sunTint = mix(vec3(0.78, 0.86, 1.0), vec3(1.0, 0.96, 0.88), ndl);
+          gl_FragColor = vec4(sunTint * light, a * opacity);
+        }
+      `,
     });
     const clouds = new THREE.Mesh(cloudsGeo, cloudsMat);
     scene.add(clouds);
     cloudsRef.current = clouds;
 
     loader.load(EARTH_CLOUDS, (t) => {
-      cloudsMat.map = t;
-      cloudsMat.alphaMap = t;
+      t.anisotropy = maxAniso;
+      cloudsUniforms.cloudMap.value = t;
       cloudsMat.needsUpdate = true;
     });
 
