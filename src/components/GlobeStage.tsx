@@ -115,6 +115,8 @@ export function GlobeStage() {
     return () => window.removeEventListener("pointermove", onMove);
   }, []);
 
+  if (!isHome) return null;
+
   return (
     <motion.div
       ref={wrapRef}
