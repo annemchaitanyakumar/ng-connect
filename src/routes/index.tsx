@@ -1,12 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
-import { ArrowUpRight, ArrowRight, Sparkles, Globe2, Zap } from "lucide-react";
+import { ArrowUpRight, ArrowRight, Sparkles, Globe2, Zap, Radio } from "lucide-react";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { Reveal, RevealWords } from "@/components/Reveal";
 import { Faq } from "@/components/Faq";
 import { Marquee } from "@/components/Marquee";
-import heroWave from "@/assets/hero-wave.jpg";
 import orbImg from "@/assets/orb-glow.jpg";
 import { services } from "@/data/services";
 
