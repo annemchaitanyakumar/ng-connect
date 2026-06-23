@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CareersRouteImport } from './routes/careers'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ServicesWebDesignRouteImport } from './routes/services.web-design'
 import { Route as ServicesVideoMultimediaRouteImport } from './routes/services.video-multimedia'
@@ -21,6 +23,16 @@ import { Route as ServicesContentRouteImport } from './routes/services.content'
 import { Route as ServicesBusinessGrowthRouteImport } from './routes/services.business-growth'
 import { Route as ServicesBrandCreativeRouteImport } from './routes/services.brand-creative'
 
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CareersRoute = CareersRouteImport.update({
+  id: '/careers',
+  path: '/careers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -79,6 +91,8 @@ const ServicesBrandCreativeRoute = ServicesBrandCreativeRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/careers': typeof CareersRoute
+  '/contact': typeof ContactRoute
   '/services/brand-creative': typeof ServicesBrandCreativeRoute
   '/services/business-growth': typeof ServicesBusinessGrowthRoute
   '/services/content': typeof ServicesContentRoute
@@ -92,6 +106,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/careers': typeof CareersRoute
+  '/contact': typeof ContactRoute
   '/services/brand-creative': typeof ServicesBrandCreativeRoute
   '/services/business-growth': typeof ServicesBusinessGrowthRoute
   '/services/content': typeof ServicesContentRoute
@@ -106,6 +122,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/careers': typeof CareersRoute
+  '/contact': typeof ContactRoute
   '/services/brand-creative': typeof ServicesBrandCreativeRoute
   '/services/business-growth': typeof ServicesBusinessGrowthRoute
   '/services/content': typeof ServicesContentRoute
@@ -121,6 +139,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/careers'
+    | '/contact'
     | '/services/brand-creative'
     | '/services/business-growth'
     | '/services/content'
@@ -134,6 +154,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/careers'
+    | '/contact'
     | '/services/brand-creative'
     | '/services/business-growth'
     | '/services/content'
@@ -147,6 +169,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/careers'
+    | '/contact'
     | '/services/brand-creative'
     | '/services/business-growth'
     | '/services/content'
@@ -161,6 +185,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CareersRoute: typeof CareersRoute
+  ContactRoute: typeof ContactRoute
   ServicesBrandCreativeRoute: typeof ServicesBrandCreativeRoute
   ServicesBusinessGrowthRoute: typeof ServicesBusinessGrowthRoute
   ServicesContentRoute: typeof ServicesContentRoute
@@ -175,6 +201,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/careers': {
+      id: '/careers'
+      path: '/careers'
+      fullPath: '/careers'
+      preLoaderRoute: typeof CareersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -257,6 +297,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CareersRoute: CareersRoute,
+  ContactRoute: ContactRoute,
   ServicesBrandCreativeRoute: ServicesBrandCreativeRoute,
   ServicesBusinessGrowthRoute: ServicesBusinessGrowthRoute,
   ServicesContentRoute: ServicesContentRoute,
