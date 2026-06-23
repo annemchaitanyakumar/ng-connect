@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import createGlobe from "cobe";
