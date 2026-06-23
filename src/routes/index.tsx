@@ -62,56 +62,121 @@ function Home() {
 function Hero() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  // Letterbox bars retract as you scroll in
+  const barH = useTransform(scrollYProgress, [0, 0.3], ["7vh", "0vh"]);
+  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "-15%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
+  const headlineScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+
+  const [now, setNow] = useState("");
+  useEffect(() => {
+    const tick = () => {
+      const d = new Date();
+      setNow(
+        d.toUTCString().slice(17, 25) + " UTC"
+      );
+    };
+    tick();
+    const t = setInterval(tick, 1000);
+    return () => clearInterval(t);
+  }, []);
 
   return (
-    <section ref={ref} className="relative surface-ink grain min-h-[100vh] flex items-end overflow-hidden pt-32 pb-20">
-      <motion.img
-        src={heroWave}
-        alt=""
-        aria-hidden
-        style={{ y, scale }}
-        className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none"
+    <section
+      ref={ref}
+      className="relative surface-ink grain min-h-[100svh] overflow-hidden pt-24"
+    >
+      {/* Letterbox bars */}
+      <motion.div style={{ height: barH }} className="absolute top-0 inset-x-0 bg-black z-30 pointer-events-none" />
+      <motion.div style={{ height: barH }} className="absolute bottom-0 inset-x-0 bg-black z-30 pointer-events-none" />
+
+      {/* Vignette + scanlines for filmic feel */}
+      <div
+        className="absolute inset-0 pointer-events-none z-10"
+        style={{
+          background:
+            "radial-gradient(120% 80% at 50% 50%, transparent 40%, oklch(0.08 0.04 235 / 0.85) 100%)",
+        }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-[oklch(0.12_0.04_235/0.5)] via-transparent to-[oklch(0.12_0.04_235)] pointer-events-none" />
+      <div
+        className="absolute inset-0 pointer-events-none z-10 opacity-[0.08] mix-blend-overlay"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(0deg, transparent 0 2px, oklch(1 0 0 / 0.6) 2px 3px)",
+        }}
+      />
 
-      <motion.div style={{ opacity }} className="container-x relative">
-        <Reveal>
-          <div className="chip-dark">
-            <Sparkles className="h-3.5 w-3.5" />
-            Global Digital Agency
+      {/* HUD frame */}
+      <div className="absolute inset-x-0 top-24 z-20 pointer-events-none">
+        <div className="container-x flex items-center justify-between text-[10px] uppercase tracking-[0.3em] text-cream/55 font-display">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-1.5 w-1.5 rounded-full bg-[var(--gold)] animate-pulse" />
+            <span>Rec · Live signal · {now || "—"}</span>
           </div>
-        </Reveal>
+          <div className="hidden md:flex items-center gap-6">
+            <span>Lat 19.07° N</span>
+            <span>Lon 72.87° E</span>
+            <span className="text-[var(--gold)]/80">NQ-001</span>
+          </div>
+        </div>
+      </div>
 
-        <h1 className="mt-8 font-display font-medium text-[clamp(2.75rem,8vw,8.5rem)] leading-[0.95] tracking-tight text-cream max-w-[16ch]">
-          <RevealWords text="Because every click should lead" />
-          <span className="block">
-            <span className="text-[var(--gold)] italic font-light">somewhere.</span>
-          </span>
-        </h1>
-
-        <div className="mt-12 grid lg:grid-cols-[1.4fr_1fr] gap-10 items-end">
-          <Reveal delay={0.3} className="text-cream/80 text-lg md:text-xl max-w-xl leading-relaxed">
-            Crafting outstanding digital solutions for your business, across the globe.
-            Networq is all about taking you to the next level in the market with brilliance
-            and creativity.
-          </Reveal>
-
-          <Reveal delay={0.5} className="flex flex-wrap gap-3 lg:justify-end">
-            <Link to="/contact" className="btn-primary">
-              Let's get started <ArrowUpRight className="h-4 w-4" />
-            </Link>
-            <Link to="/services/brand-creative" className="btn-ghost">
-              Our services
-            </Link>
+      {/* CONTENT */}
+      <motion.div
+        style={{ opacity, y: contentY }}
+        className="container-x relative z-20 flex flex-col justify-between min-h-[100svh] pt-44 pb-24"
+      >
+        {/* Top eyebrow */}
+        <div className="flex flex-col gap-6">
+          <Reveal>
+            <div className="chip-dark">
+              <Radio className="h-3.5 w-3.5" />
+              Now broadcasting · Worldwide
+            </div>
           </Reveal>
         </div>
 
-        <Reveal delay={0.7} className="mt-20 flex items-center gap-5 text-cream/60 text-xs uppercase tracking-[0.25em]">
-          <span className="inline-block w-10 h-px bg-[var(--gold)]" />
-          Scroll to explore
+        {/* Headline block — anchored to bottom for cinematic widescreen feel */}
+        <motion.div style={{ scale: headlineScale }} className="mt-auto max-w-[18ch] origin-bottom-left">
+          <h1 className="font-display font-medium text-[clamp(3rem,11vw,12rem)] leading-[0.88] tracking-[-0.04em] text-cream">
+            <span className="block overflow-hidden">
+              <RevealWords text="Every" />
+            </span>
+            <span className="block overflow-hidden">
+              <RevealWords text="click" delay={0.1} />
+            </span>
+            <span className="block overflow-hidden">
+              <span className="italic font-light text-[var(--gold)]">
+                <RevealWords text="leads somewhere." delay={0.2} />
+              </span>
+            </span>
+          </h1>
+
+          <div className="mt-12 grid lg:grid-cols-[1.4fr_auto] gap-8 items-end">
+            <Reveal delay={0.5} className="text-cream/75 text-base md:text-lg max-w-md leading-relaxed">
+              A global digital agency engineering brand, growth and intelligence
+              for businesses that refuse to be forgotten.
+            </Reveal>
+            <Reveal delay={0.65} className="flex flex-wrap gap-3">
+              <Link to="/contact" className="btn-primary">
+                Let's get started <ArrowUpRight className="h-4 w-4" />
+              </Link>
+              <Link to="/services/brand-creative" className="btn-ghost">
+                Our services
+              </Link>
+            </Reveal>
+          </div>
+        </motion.div>
+
+        {/* Bottom HUD ticker */}
+        <Reveal delay={0.9} className="mt-16 flex items-center justify-between gap-6 border-t border-white/10 pt-5 text-[10px] uppercase tracking-[0.3em] text-cream/55 font-display">
+          <span className="flex items-center gap-3">
+            <span className="inline-block w-8 h-px bg-[var(--gold)]" />
+            Scroll
+          </span>
+          <span className="hidden sm:inline">Mumbai · New York · London · Tokyo · Sydney · Dubai · Singapore</span>
+          <span className="text-[var(--gold)]/80">001 / 011</span>
         </Reveal>
       </motion.div>
     </section>
