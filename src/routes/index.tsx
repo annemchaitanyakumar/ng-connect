@@ -138,8 +138,8 @@ function Hero() {
         </div>
 
         {/* Headline block — anchored to bottom for cinematic widescreen feel */}
-        <motion.div style={{ scale: headlineScale }} className="mt-auto max-w-[18ch] origin-bottom-left">
-          <h1 className="font-display font-medium text-[clamp(3rem,11vw,12rem)] leading-[0.88] tracking-[-0.04em] text-cream">
+        <motion.div style={{ scale: headlineScale }} className="mt-auto max-w-[90%] origin-bottom-left">
+          <h1 className="font-display font-medium text-[clamp(3rem,11vw,12rem)] leading-[0.88] tracking-[-0.04em] text-cream max-w-[14ch]">
             <span className="block overflow-hidden">
               <RevealWords text="Every" />
             </span>
