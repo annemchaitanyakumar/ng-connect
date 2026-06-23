@@ -10,11 +10,65 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ServicesWebDesignRouteImport } from './routes/services.web-design'
+import { Route as ServicesVideoMultimediaRouteImport } from './routes/services.video-multimedia'
+import { Route as ServicesSocialMediaRouteImport } from './routes/services.social-media'
+import { Route as ServicesSeoRouteImport } from './routes/services.seo'
+import { Route as ServicesPerformanceRouteImport } from './routes/services.performance'
+import { Route as ServicesLocalBusinessRouteImport } from './routes/services.local-business'
+import { Route as ServicesEmergingRouteImport } from './routes/services.emerging'
+import { Route as ServicesContentRouteImport } from './routes/services.content'
+import { Route as ServicesBusinessGrowthRouteImport } from './routes/services.business-growth'
 import { Route as ServicesBrandCreativeRouteImport } from './routes/services.brand-creative'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesWebDesignRoute = ServicesWebDesignRouteImport.update({
+  id: '/services/web-design',
+  path: '/services/web-design',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesVideoMultimediaRoute = ServicesVideoMultimediaRouteImport.update({
+  id: '/services/video-multimedia',
+  path: '/services/video-multimedia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesSocialMediaRoute = ServicesSocialMediaRouteImport.update({
+  id: '/services/social-media',
+  path: '/services/social-media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesSeoRoute = ServicesSeoRouteImport.update({
+  id: '/services/seo',
+  path: '/services/seo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesPerformanceRoute = ServicesPerformanceRouteImport.update({
+  id: '/services/performance',
+  path: '/services/performance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesLocalBusinessRoute = ServicesLocalBusinessRouteImport.update({
+  id: '/services/local-business',
+  path: '/services/local-business',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesEmergingRoute = ServicesEmergingRouteImport.update({
+  id: '/services/emerging',
+  path: '/services/emerging',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesContentRoute = ServicesContentRouteImport.update({
+  id: '/services/content',
+  path: '/services/content',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesBusinessGrowthRoute = ServicesBusinessGrowthRouteImport.update({
+  id: '/services/business-growth',
+  path: '/services/business-growth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesBrandCreativeRoute = ServicesBrandCreativeRouteImport.update({
@@ -26,27 +80,97 @@ const ServicesBrandCreativeRoute = ServicesBrandCreativeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/services/brand-creative': typeof ServicesBrandCreativeRoute
+  '/services/business-growth': typeof ServicesBusinessGrowthRoute
+  '/services/content': typeof ServicesContentRoute
+  '/services/emerging': typeof ServicesEmergingRoute
+  '/services/local-business': typeof ServicesLocalBusinessRoute
+  '/services/performance': typeof ServicesPerformanceRoute
+  '/services/seo': typeof ServicesSeoRoute
+  '/services/social-media': typeof ServicesSocialMediaRoute
+  '/services/video-multimedia': typeof ServicesVideoMultimediaRoute
+  '/services/web-design': typeof ServicesWebDesignRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/services/brand-creative': typeof ServicesBrandCreativeRoute
+  '/services/business-growth': typeof ServicesBusinessGrowthRoute
+  '/services/content': typeof ServicesContentRoute
+  '/services/emerging': typeof ServicesEmergingRoute
+  '/services/local-business': typeof ServicesLocalBusinessRoute
+  '/services/performance': typeof ServicesPerformanceRoute
+  '/services/seo': typeof ServicesSeoRoute
+  '/services/social-media': typeof ServicesSocialMediaRoute
+  '/services/video-multimedia': typeof ServicesVideoMultimediaRoute
+  '/services/web-design': typeof ServicesWebDesignRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/services/brand-creative': typeof ServicesBrandCreativeRoute
+  '/services/business-growth': typeof ServicesBusinessGrowthRoute
+  '/services/content': typeof ServicesContentRoute
+  '/services/emerging': typeof ServicesEmergingRoute
+  '/services/local-business': typeof ServicesLocalBusinessRoute
+  '/services/performance': typeof ServicesPerformanceRoute
+  '/services/seo': typeof ServicesSeoRoute
+  '/services/social-media': typeof ServicesSocialMediaRoute
+  '/services/video-multimedia': typeof ServicesVideoMultimediaRoute
+  '/services/web-design': typeof ServicesWebDesignRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/services/brand-creative'
+  fullPaths:
+    | '/'
+    | '/services/brand-creative'
+    | '/services/business-growth'
+    | '/services/content'
+    | '/services/emerging'
+    | '/services/local-business'
+    | '/services/performance'
+    | '/services/seo'
+    | '/services/social-media'
+    | '/services/video-multimedia'
+    | '/services/web-design'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/services/brand-creative'
-  id: '__root__' | '/' | '/services/brand-creative'
+  to:
+    | '/'
+    | '/services/brand-creative'
+    | '/services/business-growth'
+    | '/services/content'
+    | '/services/emerging'
+    | '/services/local-business'
+    | '/services/performance'
+    | '/services/seo'
+    | '/services/social-media'
+    | '/services/video-multimedia'
+    | '/services/web-design'
+  id:
+    | '__root__'
+    | '/'
+    | '/services/brand-creative'
+    | '/services/business-growth'
+    | '/services/content'
+    | '/services/emerging'
+    | '/services/local-business'
+    | '/services/performance'
+    | '/services/seo'
+    | '/services/social-media'
+    | '/services/video-multimedia'
+    | '/services/web-design'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ServicesBrandCreativeRoute: typeof ServicesBrandCreativeRoute
+  ServicesBusinessGrowthRoute: typeof ServicesBusinessGrowthRoute
+  ServicesContentRoute: typeof ServicesContentRoute
+  ServicesEmergingRoute: typeof ServicesEmergingRoute
+  ServicesLocalBusinessRoute: typeof ServicesLocalBusinessRoute
+  ServicesPerformanceRoute: typeof ServicesPerformanceRoute
+  ServicesSeoRoute: typeof ServicesSeoRoute
+  ServicesSocialMediaRoute: typeof ServicesSocialMediaRoute
+  ServicesVideoMultimediaRoute: typeof ServicesVideoMultimediaRoute
+  ServicesWebDesignRoute: typeof ServicesWebDesignRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -56,6 +180,69 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/web-design': {
+      id: '/services/web-design'
+      path: '/services/web-design'
+      fullPath: '/services/web-design'
+      preLoaderRoute: typeof ServicesWebDesignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/video-multimedia': {
+      id: '/services/video-multimedia'
+      path: '/services/video-multimedia'
+      fullPath: '/services/video-multimedia'
+      preLoaderRoute: typeof ServicesVideoMultimediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/social-media': {
+      id: '/services/social-media'
+      path: '/services/social-media'
+      fullPath: '/services/social-media'
+      preLoaderRoute: typeof ServicesSocialMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/seo': {
+      id: '/services/seo'
+      path: '/services/seo'
+      fullPath: '/services/seo'
+      preLoaderRoute: typeof ServicesSeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/performance': {
+      id: '/services/performance'
+      path: '/services/performance'
+      fullPath: '/services/performance'
+      preLoaderRoute: typeof ServicesPerformanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/local-business': {
+      id: '/services/local-business'
+      path: '/services/local-business'
+      fullPath: '/services/local-business'
+      preLoaderRoute: typeof ServicesLocalBusinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/emerging': {
+      id: '/services/emerging'
+      path: '/services/emerging'
+      fullPath: '/services/emerging'
+      preLoaderRoute: typeof ServicesEmergingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/content': {
+      id: '/services/content'
+      path: '/services/content'
+      fullPath: '/services/content'
+      preLoaderRoute: typeof ServicesContentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/business-growth': {
+      id: '/services/business-growth'
+      path: '/services/business-growth'
+      fullPath: '/services/business-growth'
+      preLoaderRoute: typeof ServicesBusinessGrowthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services/brand-creative': {
@@ -71,6 +258,15 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ServicesBrandCreativeRoute: ServicesBrandCreativeRoute,
+  ServicesBusinessGrowthRoute: ServicesBusinessGrowthRoute,
+  ServicesContentRoute: ServicesContentRoute,
+  ServicesEmergingRoute: ServicesEmergingRoute,
+  ServicesLocalBusinessRoute: ServicesLocalBusinessRoute,
+  ServicesPerformanceRoute: ServicesPerformanceRoute,
+  ServicesSeoRoute: ServicesSeoRoute,
+  ServicesSocialMediaRoute: ServicesSocialMediaRoute,
+  ServicesVideoMultimediaRoute: ServicesVideoMultimediaRoute,
+  ServicesWebDesignRoute: ServicesWebDesignRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
