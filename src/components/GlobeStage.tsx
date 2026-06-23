@@ -233,25 +233,30 @@ export function GlobeStage() {
 
     // ------ Animation ------
     let raf = 0;
+    let visible = true;
     const clock = new THREE.Clock();
     const tick = () => {
-      const dt = clock.getDelta();
-      if (!reduce) {
-        earth.rotation.y += dt * 0.06;
-        clouds.rotation.y += dt * 0.075;
+      const dt = Math.min(clock.getDelta(), 0.05);
+      if (visible) {
+        if (!reduce) {
+          earth.rotation.y += dt * 0.06;
+          clouds.rotation.y += dt * 0.075;
+        }
+        earth.rotation.x += (tiltRef.current.y * 0.4 - earth.rotation.x) * 0.05;
+        clouds.rotation.x = earth.rotation.x;
+        atmo.rotation.copy(earth.rotation);
+        renderer.render(scene, camera);
       }
-      // Pointer parallax tilt (eased)
-      earth.rotation.x += (tiltRef.current.y * 0.4 - earth.rotation.x) * 0.05;
-      clouds.rotation.x = earth.rotation.x;
-      atmo.rotation.copy(earth.rotation);
-
-      renderer.render(scene, camera);
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
 
+    const onVis = () => { visible = !document.hidden; };
+    document.addEventListener("visibilitychange", onVis);
+
     return () => {
       cancelAnimationFrame(raf);
+      document.removeEventListener("visibilitychange", onVis);
       ro.disconnect();
       renderer.dispose();
       earthGeo.dispose();
