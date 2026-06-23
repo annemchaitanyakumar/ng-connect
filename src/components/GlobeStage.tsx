@@ -102,7 +102,7 @@ export function GlobeStage() {
       ro.disconnect();
       window.removeEventListener("resize", onResize);
     };
-  }, [reduce]);
+  }, [reduce, isHome]);
 
   // Pointer parallax
   useEffect(() => {
