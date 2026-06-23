@@ -237,7 +237,7 @@ export function GlobeStage() {
   return (
     <motion.div
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-0 hidden md:block"
+      className="pointer-events-none fixed inset-0 z-0"
       style={{ opacity, filter }}
     >
       <motion.div
