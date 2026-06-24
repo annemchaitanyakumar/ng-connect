@@ -4,4 +4,4 @@
 #
 # Use Render.com instead: https://render.com
 # Build: npm run build
-# Start: node dist/server/server.js
+# Start: npx srvx serve --prod --entry dist/server/server.js -s ../client

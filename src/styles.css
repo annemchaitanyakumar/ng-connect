@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: "Squarish Sans";
-  src: url("/Networq Brand logo files/font/squarish-sans/Squarish Sans CT Regular.ttf") format("truetype");
+  src: url("/brand-assets/font/squarish-sans/squarish-sans-ct-regular.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -12,7 +12,7 @@
 
 @font-face {
   font-family: "Squarish Sans SC";
-  src: url("/Networq Brand logo files/font/squarish-sans/Squarish Sans CT Regular SC.ttf") format("truetype");
+  src: url("/brand-assets/font/squarish-sans/squarish-sans-ct-regular-sc.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;

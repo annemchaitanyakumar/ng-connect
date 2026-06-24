@@ -67,7 +67,7 @@ export function Navbar() {
       <div className="h-16 flex items-center justify-between px-6">
         <Link to="/" className="group flex items-center">
           <img
-            src="/Networq Brand logo files/Company logo/SVG/SVG/full logo inverted colours.svg"
+            src="/brand-assets/company-logo-inverted.svg"
             alt="Networq Global Logo"
             className="h-8 md:h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
           />

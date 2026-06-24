@@ -40,7 +40,7 @@ export function Footer() {
           <div>
             <div className="mb-6">
               <img
-                src="/Networq Brand logo files/Company logo/SVG/SVG/full logo inverted colours.svg"
+                src="/brand-assets/company-logo-inverted.svg"
                 alt="Networq Global Logo"
                 className="h-10 md:h-11 w-auto object-contain"
               />

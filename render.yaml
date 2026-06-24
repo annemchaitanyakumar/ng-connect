@@ -3,11 +3,9 @@ services:
     name: networq-global
     runtime: node
     buildCommand: npm install && npm run build
-    startCommand: node dist/server/server.js
+    startCommand: npx srvx serve --prod --entry dist/server/server.js -s ../client
     envVars:
-      - key: NODE_VERSION
-        value: 22
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
+      - key: HOST
+        value: 0.0.0.0
