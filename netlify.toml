@@ -1,6 +1,7 @@
-[build]
-  command = "npm run build"
-  publish = "dist/client"
-
-[build.environment]
-  NODE_VERSION = "22"
+# Netlify is NOT recommended for this app.
+# TanStack Start is a full SSR app — it has no static index.html.
+# Netlify's static file serving cannot handle SSR routing.
+#
+# Use Render.com instead: https://render.com
+# Build: npm run build
+# Start: node dist/server/server.js
