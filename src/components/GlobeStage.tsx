@@ -1,7 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import * as THREE from "three";
+
+import earthDayImg from "../assets/earth-blue-marble.jpg";
+import earthTopologyImg from "../assets/earth-topology.png";
+import earthWaterImg from "../assets/earth-water.png";
+import earthCloudsImg from "../assets/earth-clouds.png";
 
 /**
  * Realistic photoreal globe that persists across every page.
@@ -13,21 +18,40 @@ import * as THREE from "three";
  * - Scroll progress and pathname drive its size, position, blur and tilt.
  */
 
-const EARTH_DAY =
-  "https://unpkg.com/three-globe@2.31.1/example/img/earth-blue-marble.jpg";
-const EARTH_TOPOLOGY =
-  "https://unpkg.com/three-globe@2.31.1/example/img/earth-topology.png";
-const EARTH_WATER =
-  "https://unpkg.com/three-globe@2.31.1/example/img/earth-water.png";
-const EARTH_CLOUDS =
-  "https://unpkg.com/three-globe@2.31.1/example/img/clouds.png";
+const EARTH_DAY = earthDayImg;
+const EARTH_TOPOLOGY = earthTopologyImg;
+const EARTH_WATER = earthWaterImg;
+const EARTH_CLOUDS = earthCloudsImg;
 
 export function GlobeStage() {
   const mountRef = useRef<HTMLDivElement>(null);
   const earthRef = useRef<THREE.Mesh | null>(null);
-  const cloudsRef = useRef<THREE.Mesh | null>(null);
+  const clouds1Ref = useRef<THREE.Mesh | null>(null);
+  const clouds2Ref = useRef<THREE.Mesh | null>(null);
   const tiltRef = useRef({ x: 0, y: 0 });
   const reduce = useReducedMotion();
+
+  const [showClouds, setShowClouds] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("show-clouds");
+      return saved !== "false";
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    const handleToggle = (e: Event) => {
+      const customEvent = e as CustomEvent<boolean>;
+      setShowClouds(customEvent.detail);
+    };
+    window.addEventListener("toggle-clouds", handleToggle);
+    return () => window.removeEventListener("toggle-clouds", handleToggle);
+  }, []);
+
+  useEffect(() => {
+    if (clouds1Ref.current) clouds1Ref.current.visible = showClouds;
+    if (clouds2Ref.current) clouds2Ref.current.visible = showClouds;
+  }, [showClouds]);
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isHome = pathname === "/";
@@ -40,28 +64,18 @@ export function GlobeStage() {
     mass: 0.6,
   });
 
-  // Trajectory across the page. Home hero parks the globe on the right at
-  // full scale; as the user scrolls it drifts left and shrinks to a
-  // companion mark. Inner pages park the globe smaller in the corner and
-  // drift it gently on scroll.
-  const sizeVw = useTransform(
+  // Keep size and position fixed
+  const sizeVw = 56;
+  const xVw = 86;
+  const yVh = 50;
+
+  // Fade out smoothly on scroll from the main hero page (opacity 1 -> 0 by scroll = 0.25)
+  // Hide completely on other pages (opacity 0)
+  const opacity = useTransform(
     smoothY,
-    [0, 0.2, 0.6, 1],
-    isHome ? [85, 70, 38, 30] : [42, 38, 32, 28],
+    [0, 0.25],
+    isHome ? [1, 0] : [0, 0]
   );
-  const xVw = useTransform(
-    smoothY,
-    [0, 0.2, 0.6, 1],
-    isHome ? [78, 70, 22, 78] : [82, 75, 22, 82],
-  );
-  const yVh = useTransform(
-    smoothY,
-    [0, 0.2, 0.6, 1],
-    isHome ? [55, 50, 55, 65] : [22, 35, 60, 70],
-  );
-  const opacity = useTransform(smoothY, [0, 0.95], [1, 0.7]);
-  const blur = useTransform(smoothY, [0, 1], [0, 1.5]);
-  const filter = useTransform(blur, (b) => `blur(${b}px)`);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -137,16 +151,15 @@ export function GlobeStage() {
       earthMat.needsUpdate = true;
     });
 
-    // ------ Clouds — fluffier, with a custom shader so they shade with the sun
-    //  and fade out on the night side instead of looking like a flat decal.
-    const cloudsGeo = new THREE.SphereGeometry(1.015, 96, 96);
-    const cloudsUniforms = {
+    // ------ Clouds Layer 1 (Lower) ------
+    const cloudsGeo1 = new THREE.SphereGeometry(1.012, 96, 96);
+    const cloudsUniforms1 = {
       cloudMap: { value: null as THREE.Texture | null },
       sunDir: { value: new THREE.Vector3(5, 1.5, 3.5).normalize() },
-      opacity: { value: 0.85 },
+      opacity: { value: 0.80 },
     };
-    const cloudsMat = new THREE.ShaderMaterial({
-      uniforms: cloudsUniforms,
+    const cloudsMat1 = new THREE.ShaderMaterial({
+      uniforms: cloudsUniforms1,
       transparent: true,
       depthWrite: false,
       vertexShader: `
@@ -166,57 +179,73 @@ export function GlobeStage() {
         uniform float opacity;
         void main() {
           vec4 c = texture2D(cloudMap, vUv);
-          float a = c.r; // alpha encoded in luminance
+          float a = c.a;
           if (a < 0.02) discard;
           float ndl = clamp(dot(normalize(vWorldNormal), normalize(sunDir)), 0.0, 1.0);
-          // soft day/night falloff so cloud tops glow warm in sun, fade dark at night
           float light = mix(0.08, 1.0, smoothstep(0.0, 0.45, ndl));
           vec3 sunTint = mix(vec3(0.78, 0.86, 1.0), vec3(1.0, 0.96, 0.88), ndl);
           gl_FragColor = vec4(sunTint * light, a * opacity);
         }
       `,
     });
-    const clouds = new THREE.Mesh(cloudsGeo, cloudsMat);
-    scene.add(clouds);
-    cloudsRef.current = clouds;
+    const clouds1 = new THREE.Mesh(cloudsGeo1, cloudsMat1);
+    clouds1.visible = showClouds;
+    scene.add(clouds1);
+    clouds1Ref.current = clouds1;
 
-    loader.load(EARTH_CLOUDS, (t) => {
-      t.anisotropy = maxAniso;
-      cloudsUniforms.cloudMap.value = t;
-      cloudsMat.needsUpdate = true;
-    });
-
-    // ------ Atmosphere (fresnel glow) ------
-    const atmoMat = new THREE.ShaderMaterial({
-      uniforms: {
-        glowColor: { value: new THREE.Color(0x6fb6ff) },
-      },
+    // ------ Clouds Layer 2 (Upper Volumetric) ------
+    const cloudsGeo2 = new THREE.SphereGeometry(1.018, 96, 96);
+    const cloudsUniforms2 = {
+      cloudMap: { value: null as THREE.Texture | null },
+      sunDir: { value: new THREE.Vector3(5, 1.5, 3.5).normalize() },
+      opacity: { value: 0.50 },
+    };
+    const cloudsMat2 = new THREE.ShaderMaterial({
+      uniforms: cloudsUniforms2,
+      transparent: true,
+      depthWrite: false,
       vertexShader: `
-        varying vec3 vNormal;
-        varying vec3 vViewDir;
+        varying vec2 vUv;
+        varying vec3 vWorldNormal;
         void main() {
-          vec4 mv = modelViewMatrix * vec4(position, 1.0);
-          vNormal = normalize(normalMatrix * normal);
-          vViewDir = normalize(-mv.xyz);
-          gl_Position = projectionMatrix * mv;
+          vUv = uv;
+          vWorldNormal = normalize(mat3(modelMatrix) * normal);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
       `,
       fragmentShader: `
-        varying vec3 vNormal;
-        varying vec3 vViewDir;
-        uniform vec3 glowColor;
+        varying vec2 vUv;
+        varying vec3 vWorldNormal;
+        uniform sampler2D cloudMap;
+        uniform vec3 sunDir;
+        uniform float opacity;
         void main() {
-          float intensity = pow(0.72 - dot(vNormal, vViewDir), 3.2);
-          gl_FragColor = vec4(glowColor, 1.0) * intensity;
+          vec4 c = texture2D(cloudMap, vUv);
+          float a = c.a;
+          if (a < 0.02) discard;
+          float ndl = clamp(dot(normalize(vWorldNormal), normalize(sunDir)), 0.0, 1.0);
+          float light = mix(0.08, 1.0, smoothstep(0.0, 0.45, ndl));
+          vec3 sunTint = mix(vec3(0.78, 0.86, 1.0), vec3(1.0, 0.96, 0.88), ndl);
+          gl_FragColor = vec4(sunTint * light, a * opacity);
         }
       `,
-      blending: THREE.AdditiveBlending,
-      side: THREE.BackSide,
-      transparent: true,
-      depthWrite: false,
     });
-    const atmo = new THREE.Mesh(new THREE.SphereGeometry(1.18, 64, 64), atmoMat);
-    scene.add(atmo);
+    const clouds2 = new THREE.Mesh(cloudsGeo2, cloudsMat2);
+    clouds2.rotation.y = Math.PI / 4;
+    clouds2.visible = showClouds;
+    scene.add(clouds2);
+    clouds2Ref.current = clouds2;
+
+    loader.load(EARTH_CLOUDS, (t) => {
+      t.anisotropy = maxAniso;
+      cloudsUniforms1.cloudMap.value = t;
+      cloudsUniforms2.cloudMap.value = t;
+      cloudsMat1.needsUpdate = true;
+      cloudsMat2.needsUpdate = true;
+    });
+
+    // ------ Atmosphere (fresnel glow) ------
+    // Disabled atmo glow to make the globe cleaner
 
     // ------ Resize ------
     const resize = () => {
@@ -240,11 +269,12 @@ export function GlobeStage() {
       if (visible) {
         if (!reduce) {
           earth.rotation.y += dt * 0.06;
-          clouds.rotation.y += dt * 0.075;
+          clouds1.rotation.y += dt * 0.075;
+          clouds2.rotation.y += dt * 0.055;
         }
         earth.rotation.x += (tiltRef.current.y * 0.4 - earth.rotation.x) * 0.05;
-        clouds.rotation.x = earth.rotation.x;
-        atmo.rotation.copy(earth.rotation);
+        clouds1.rotation.x = earth.rotation.x;
+        clouds2.rotation.x = earth.rotation.x;
         renderer.render(scene, camera);
       }
       raf = requestAnimationFrame(tick);
@@ -261,9 +291,10 @@ export function GlobeStage() {
       renderer.dispose();
       earthGeo.dispose();
       earthMat.dispose();
-      cloudsGeo.dispose();
-      cloudsMat.dispose();
-      atmoMat.dispose();
+      cloudsGeo1.dispose();
+      cloudsMat1.dispose();
+      cloudsGeo2.dispose();
+      cloudsMat2.dispose();
       if (renderer.domElement.parentNode === mount) {
         mount.removeChild(renderer.domElement);
       }
@@ -284,29 +315,21 @@ export function GlobeStage() {
   return (
     <motion.div
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-0"
-      style={{ opacity, filter }}
+      className="pointer-events-none fixed inset-0 z-20"
+      style={{ opacity }}
     >
       <motion.div
         className="absolute"
         style={{
-          left: useTransform(xVw, (v) => `${v}vw`),
-          top: useTransform(yVh, (v) => `${v}vh`),
-          width: useTransform(sizeVw, (v) => `${v}vw`),
-          height: useTransform(sizeVw, (v) => `${v}vw`),
+          left: `${xVw}vw`,
+          top: `${yVh}vh`,
+          width: `${sizeVw}vw`,
+          height: `${sizeVw}vw`,
           translateX: "-50%",
           translateY: "-50%",
         }}
       >
-        {/* warm halo behind the globe */}
-        <div
-          className="absolute inset-[-22%] rounded-full pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(closest-side, oklch(0.84 0.16 85 / 0.18), oklch(0.84 0.16 85 / 0.05) 38%, transparent 68%)",
-            filter: "blur(24px)",
-          }}
-        />
+
         <div
           ref={mountRef}
           className="relative w-full h-full"

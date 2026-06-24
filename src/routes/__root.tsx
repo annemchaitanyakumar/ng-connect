@@ -7,10 +7,10 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode, useState, useEffect } from "react";
+import { Preloader } from "../components/Preloader";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
   return (
@@ -34,9 +34,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center surface-ink px-4">
@@ -113,10 +110,33 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const [showPreloader, setShowPreloader] = useState(true);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get("loader") === "true") {
+      sessionStorage.removeItem("networq-preloader-viewed");
+      setShowPreloader(true);
+      return;
+    }
+
+    const hasPlayed = sessionStorage.getItem("networq-preloader-viewed");
+    if (hasPlayed) {
+      setShowPreloader(false);
+    }
+  }, []);
+
+  const handleComplete = () => {
+    sessionStorage.setItem("networq-preloader-viewed", "true");
+    setShowPreloader(false);
+  };
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      {showPreloader && <Preloader onComplete={handleComplete} />}
+      <div style={{ opacity: showPreloader ? 0 : 1, transition: "opacity 0.8s ease-out" }}>
+        <Outlet />
+      </div>
     </QueryClientProvider>
   );
 }

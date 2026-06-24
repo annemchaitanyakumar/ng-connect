@@ -63,8 +63,6 @@ function Hero() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
 
-  // Letterbox bars retract as you scroll in
-  const barH = useTransform(scrollYProgress, [0, 0.3], ["7vh", "0vh"]);
   const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "-15%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
   const headlineScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
@@ -85,12 +83,8 @@ function Hero() {
   return (
     <section
       ref={ref}
-      className="relative surface-ink grain min-h-[100svh] overflow-hidden pt-24"
+      className="relative surface-ink grain min-h-[100svh] overflow-hidden"
     >
-      {/* Letterbox bars */}
-      <motion.div style={{ height: barH }} className="absolute top-0 inset-x-0 bg-black z-30 pointer-events-none" />
-      <motion.div style={{ height: barH }} className="absolute bottom-0 inset-x-0 bg-black z-30 pointer-events-none" />
-
       {/* Vignette + scanlines for filmic feel */}
       <div
         className="absolute inset-0 pointer-events-none z-10"
@@ -107,70 +101,53 @@ function Hero() {
         }}
       />
 
-      {/* HUD frame */}
-      <div className="absolute inset-x-0 top-24 z-20 pointer-events-none">
-        <div className="container-x flex items-center justify-between text-[10px] uppercase tracking-[0.3em] text-cream/55 font-display">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex h-1.5 w-1.5 rounded-full bg-[var(--gold)] animate-pulse" />
-            <span>Rec · Live signal · {now || "—"}</span>
-          </div>
-          <div className="hidden md:flex items-center gap-6">
-            <span>Lat 19.07° N</span>
-            <span>Lon 72.87° E</span>
-            <span className="text-[var(--gold)]/80">NQ-001</span>
-          </div>
-        </div>
-      </div>
-
       {/* CONTENT */}
       <motion.div
         style={{ opacity, y: contentY }}
-        className="container-x relative z-20 flex flex-col justify-between min-h-[100svh] pt-44 pb-24"
+        className="w-full pl-4 md:pl-6 lg:pl-8 pr-6 relative z-20 flex flex-col min-h-[100svh] pt-24 pb-20"
       >
-        {/* Top eyebrow */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 md:gap-8 pt-4">
+          {/* Top eyebrow */}
           <Reveal>
-            <div className="chip-dark">
-              <Radio className="h-3.5 w-3.5" />
-              Now broadcasting · Worldwide
+            <div className="text-sm font-semibold uppercase tracking-widest text-[var(--gold)]">
+              Because every click should lead somewhere
             </div>
           </Reveal>
+
+          {/* Headline block */}
+          <motion.div style={{ scale: headlineScale }} className="max-w-[90%] origin-top-left">
+            <h1 className="font-display font-medium text-[clamp(2.5rem,6.5vw,7.5rem)] leading-[1.0] tracking-tight text-cream max-w-[20ch]">
+              <span className="block overflow-hidden">
+                <RevealWords text="Crafting outstanding digital" />
+              </span>
+              <span className="block overflow-hidden">
+                <RevealWords text="solutions for your business," delay={0.15} />
+              </span>
+              <span className="block overflow-hidden">
+                <span className="italic font-light text-[var(--gold)]">
+                  <RevealWords text="across the globe!" delay={0.3} />
+                </span>
+              </span>
+            </h1>
+
+            <div className="mt-8 flex flex-col gap-6 items-start max-w-xl">
+              <Reveal delay={0.5} className="text-cream/75 text-base md:text-lg leading-relaxed">
+                Networq is all about taking you to the next level in the market with brilliance and creativity.
+              </Reveal>
+              <Reveal delay={0.65} className="flex flex-wrap gap-3">
+                <Link to="/contact" className="btn-primary">
+                  Let’s Get Started <ArrowUpRight className="h-4 w-4" />
+                </Link>
+                <Link to="/services" className="btn-ghost">
+                  Our services
+                </Link>
+              </Reveal>
+            </div>
+          </motion.div>
         </div>
 
-        {/* Headline block — anchored to bottom for cinematic widescreen feel */}
-        <motion.div style={{ scale: headlineScale }} className="mt-auto max-w-[90%] origin-bottom-left">
-          <h1 className="font-display font-medium text-[clamp(3rem,11vw,12rem)] leading-[0.88] tracking-[-0.04em] text-cream max-w-[14ch]">
-            <span className="block overflow-hidden">
-              <RevealWords text="Every" />
-            </span>
-            <span className="block overflow-hidden">
-              <RevealWords text="click" delay={0.1} />
-            </span>
-            <span className="block overflow-hidden">
-              <span className="italic font-light text-[var(--gold)]">
-                <RevealWords text="leads somewhere." delay={0.2} />
-              </span>
-            </span>
-          </h1>
-
-          <div className="mt-12 grid lg:grid-cols-[1.4fr_auto] gap-8 items-end">
-            <Reveal delay={0.5} className="text-cream/75 text-base md:text-lg max-w-md leading-relaxed">
-              A global digital agency engineering brand, growth and intelligence
-              for businesses that refuse to be forgotten.
-            </Reveal>
-            <Reveal delay={0.65} className="flex flex-wrap gap-3">
-              <Link to="/contact" className="btn-primary">
-                Let's get started <ArrowUpRight className="h-4 w-4" />
-              </Link>
-              <Link to="/services/brand-creative" className="btn-ghost">
-                Our services
-              </Link>
-            </Reveal>
-          </div>
-        </motion.div>
-
         {/* Bottom HUD ticker */}
-        <Reveal delay={0.9} className="mt-16 flex items-center justify-between gap-6 border-t border-white/10 pt-5 text-[10px] uppercase tracking-[0.3em] text-cream/55 font-display">
+        <Reveal delay={0.9} className="mt-auto flex items-center justify-between gap-6 border-t border-white/10 pt-5 text-[10px] uppercase tracking-[0.3em] text-cream/55 font-display">
           <span className="flex items-center gap-3">
             <span className="inline-block w-8 h-px bg-[var(--gold)]" />
             Scroll

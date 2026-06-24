@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1271.39 298.82">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+        font-size: 241.09px;
+      }
+
+      .cls-1, .cls-2 {
+        font-family: Squaresharps, Squaresharps;
+      }
+
+      .cls-2 {
+        fill: #ffc750;
+        font-size: 120.54px;
+      }
+
+      .cls-3 {
+        fill: #010101;
+        stroke: #ffc750;
+        stroke-miterlimit: 10;
+      }
+    </style>
+  </defs>
+  <text/>
+  <text class="cls-1" transform="translate(50.59 188.35) scale(.93 1)"><tspan x="0" y="0">NETWORQ</tspan></text>
+  <text class="cls-2" transform="translate(326.95 288.65) scale(.93 1)"><tspan x="0" y="0">GLOBAL</tspan></text>
+  <line class="cls-3" x1="75.87" y1="258.82" x2="309.11" y2="260.74"/>
+  <line class="cls-3" x1="754.12" y1="258.82" x2="990.12" y2="260.74"/>
+</svg>

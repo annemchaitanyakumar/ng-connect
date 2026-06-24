@@ -38,13 +38,12 @@ export function Footer() {
       <div className="container-x pt-24 pb-12 relative">
         <div className="grid lg:grid-cols-[1.4fr_1fr_1fr_1fr] gap-12">
           <div>
-            <div className="flex items-center gap-2.5 mb-6">
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--gold)] text-[var(--ink)] font-display font-bold">
-                N
-              </span>
-              <span className="font-display text-xl text-cream">
-                Networq <span className="text-[var(--gold)]">Global</span>
-              </span>
+            <div className="mb-6">
+              <img
+                src="/Networq Brand logo files/Company logo/SVG/SVG/full logo inverted colours.svg"
+                alt="Networq Global Logo"
+                className="h-10 md:h-11 w-auto object-contain"
+              />
             </div>
             <p className="text-cream/70 text-sm max-w-sm leading-relaxed">
               Crafting outstanding digital solutions for businesses across the globe.
