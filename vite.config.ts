@@ -14,7 +14,6 @@ export default defineConfig({
     tanstackStart({
       server: {
         entry: "src/server.ts",
-        preset: process.env.NETLIFY ? "netlify" : undefined,
       },
       importProtection: {
         behavior: "error",
