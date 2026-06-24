@@ -1,0 +1,12 @@
+[build]
+  command = "npm run build"
+  publish = "dist/client"
+
+# Configure Netlify Functions for TanStack Start / Nitro SSR
+[functions]
+  directory = ".netlify/functions-internal"
+
+[[redirects]]
+  from = "/*"
+  status = 200
+  to = "/.netlify/functions-internal/server"
