@@ -2,7 +2,7 @@ services:
   - type: web
     name: networq-global
     runtime: node
-    buildCommand: npm run build
+    buildCommand: npm install && npm run build
     startCommand: node dist/server/server.js
     envVars:
       - key: NODE_VERSION
